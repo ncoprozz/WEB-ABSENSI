@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Absensi Online</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background-color: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    .logo{
+        text-align: center;
+        margin: 10px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    #alasanGroup {
+      display: none; /* Disembunyikan dulu secara default */
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="logo">
+        <img src="img/logo-unitomo.png" height="120px" width="120px">
+    </div>
+    <h2>Form Absensi</h2>
+    <form id="absensiForm">
+      <div class="form-group">
+        <label for="nama">Nama Lengkap</label>
+        <input type="text" id="nama" required placeholder="Masukkan nama...">
+      </div>
+
+      <div class="form-group">
+        <label for="kelas">Kelas / Divisi</label>
+        <input type="text" id="kelas" required placeholder="Contoh: XII-RPL / Networking">
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status Kehadiran</label>
+        <select id="status" onchange="toggleAlasan()" required>
+          <option value="Hadir">Hadir</option>
+          <option value="Izin">Izin</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="alasanGroup">
+        <label for="alasan">Alasan Izin</label>
+        <textarea id="alasan" rows="3" placeholder="Tuliskan alasan izin..."></textarea>
+      </div>
+
+      <button type="submit" id="btnSubmit">Kirim Absen</button>
+    </form>
+  </div>
+
+  <script>
+    // Fungsi untuk menampilkan field alasan HANYA saat status 'Izin' dipilih
+    function toggleAlasan() {
+      var status = document.getElementById("status").value;
+      var alasanGroup = document.getElementById("alasanGroup");
+      if (status === "Izin") {
+        alasanGroup.style.display = "block";
+      } else {
+        alasanGroup.style.display = "none";
+      }
+    }
+  </script>
+
+  <script>
+    // 1. Simpan URL Web App Apps Script kamu di sini
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxI96WEwn2pIWgrjLH-VaRkXG8pdgW9Z5Vo0eSTh54CK6mvkFpn8NfU_1ZR4YSkRIBA/exec";
+
+    // 2. Fungsi untuk menampilkan/menyembunyikan kolom alasan
+    function toggleAlasan() {
+      var status = document.getElementById("status").value;
+      var alasanGroup = document.getElementById("alasanGroup");
+      if (status === "Izin") {
+        alasanGroup.style.display = "block";
+      } else {
+        alasanGroup.style.display = "none";
+      }
+    }
+
+    // 3. Event Listener saat tombol 'Kirim Absen' diklik
+    document.getElementById("absensiForm").addEventListener("submit", function(e) {
+      e.preventDefault(); // Mencegah reload halaman
+      
+      const btnSubmit = document.getElementById("btnSubmit");
+      btnSubmit.innerText = "Mengirim...";
+      btnSubmit.disabled = true;
+
+      // Ambil data dari form
+      const dataPayload = {
+        nama: document.getElementById("nama").value,
+        kelas: document.getElementById("kelas").value,
+        status: document.getElementById("status").value,
+        alasan: document.getElementById("alasan").value
+      };
+
+      // Kirim data ke Google Apps Script menggunakan fetch API (POST)
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors", // Digunakan agar tidak terhalang kebijakan CORS Google
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(dataPayload)
+      })
+      .then(response => {
+        alert("Berhasil! Data absensi telah terkirim.");
+        document.getElementById("absensiForm").reset(); // Reset form
+        toggleAlasan(); // Sembunyikan lagi input alasan
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Gagal mengirim absensi, silakan coba lagi.");
+      })
+      .finally(() => {
+        btnSubmit.innerText = "Kirim Absen";
+        btnSubmit.disabled = false;
+      });
+    });
+  </script>
+
+</body>
+</html>
